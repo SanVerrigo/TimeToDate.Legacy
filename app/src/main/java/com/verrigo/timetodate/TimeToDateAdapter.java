@@ -1,6 +1,5 @@
 package com.verrigo.timetodate;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -12,14 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by Verrigo on 29.07.2018.
@@ -51,16 +46,13 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
         int endMargin;
         if (deleteAnimator != null && deleteAnimator.isRunning()) {
             startMargin = (int) deleteAnimator.getAnimatedValue();
-        } else  {
+            deleteAnimator.cancel();
+        } else {
             startMargin = isDeletingMode ? HIDDEN_MARGIN : 0;
         }
-        if (isDeletingMode) {
-            endMargin = 0;
-        } else {
-            endMargin = HIDDEN_MARGIN;
-        }
-        deleteAnimator = ValueAnimator.ofInt(startMargin, endMargin);
-        deleteAnimator.setDuration(500);
+        endMargin = isDeletingMode ? 0 : HIDDEN_MARGIN;
+        deleteAnimator = ValueAnimator.ofInt(startMargin, endMargin)
+                .setDuration(500);
         deleteAnimator.setInterpolator(new FastOutSlowInInterpolator());
         deleteAnimator.start();
         notifyDataSetChanged();
@@ -104,23 +96,21 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
             }
         });
 
-        final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) holder.space.getLayoutParams();
-        if (deleteAnimator != null && deleteAnimator.isRunning()) {
-            deleteAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    int margin = (int) animation.getAnimatedValue();
-                    lp.leftMargin = margin;
-                    holder.space.requestLayout();
-                }
-            });
+        if (deleteAnimator != null) {
+            final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) holder.space.getLayoutParams();
+            if (deleteAnimator.isRunning()) {
+                deleteAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        lp.leftMargin = (int) animation.getAnimatedValue();
+                        holder.space.requestLayout();
+                    }
+                });
+            } else {
+                lp.leftMargin = (int) deleteAnimator.getAnimatedValue();
+                holder.space.requestLayout();
+            }
         }
-
-//        if (isDeletingMode) {
-//            holder.deleteTimeToDateImageButton.setVisibility(View.VISIBLE);
-//        } else {
-//            holder.deleteTimeToDateImageButton.setVisibility(View.GONE);
-//        }
         holder.itemView.setTag(holder);
         holder.itemView.setOnClickListener(this);
     }
@@ -182,10 +172,6 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
                 setTimeToDates(new TimeToDateDatabaseHelper(context).dbParseListTimeToDates());
                 notifyItemRemoved(position);
             } else {
-                Toast.makeText(context, "Successfully deleted!", Toast.LENGTH_SHORT).show();
-                setTimeToDates(new TimeToDateDatabaseHelper(context).dbParseListTimeToDates());
-                notifyItemRemoved(position);
-                runTimer();
             }
         }
     }
