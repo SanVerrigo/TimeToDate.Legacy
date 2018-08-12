@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Time To Date</string>
-    <string name="choose_the_date">Выбрать дату</string>
+    <string name="choose_the_date_string">Выбрать дату</string>
+    <string name="description_string">Описание:</string>
+    <string name="date_string">Дата:</string>
+    <string name="enter_description_string">Введите описание</string>
+    <string name="add_description_string">Добавить описание</string>
+    <string name="event_name_string">Название события:</string>
+    <string name="num_of_hours_string">Количество часов:</string>
+    <string name="creation_string">Создание</string>
+    <string name="edit_description">Редактировать</string>
+    <string name="description_create_state_string">Описание</string>
 </resources>

@@ -17,18 +17,22 @@ public class TimeToDate {
 
     public final static String format = "yyyy-MM-dd-kk";
 
+    private boolean isExpanded = false;
     private int _id = 0;
     private String name;
     private String date;
+    private String description;
 
     TimeToDate() {
     }
 
-    TimeToDate(String name, String date) {
+    TimeToDate(String name, String date, String description) {
+        this.description = description;
         this.name = name;
         this.date = date;
     }
-    TimeToDate(String name, String date, int _id) {
+    TimeToDate(String name, String date, String description, int _id) {
+        this.description = description;
         this._id = _id;
         this.name = name;
         this.date = date;
@@ -80,5 +84,21 @@ public class TimeToDate {
 
     public int get_id() {
         return _id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        isExpanded = expanded;
     }
 }

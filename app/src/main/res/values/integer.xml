@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="enter_description_max_width_integer">300</integer>
+</resources>

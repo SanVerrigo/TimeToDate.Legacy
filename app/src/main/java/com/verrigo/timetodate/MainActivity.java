@@ -1,6 +1,7 @@
 package com.verrigo.timetodate;
 
 import android.support.design.widget.FloatingActionButton;
+import android.support.transition.TransitionManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,19 +19,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final RecyclerView recyclerView = findViewById(R.id.time_to_date_recycler_view);
         adapter = new TimeToDateAdapter(new OnRecyclerItemClickListener() {
             @Override
             public void onRecyclerItemClick(TimeToDate timeToDate) {
-
+//                TransitionManager.beginDelayedTransition(recyclerView);
+//                adapter.notifyDataSetChanged();
             }
         });
         dbHelper = new TimeToDateDatabaseHelper(this);
-        RecyclerView recyclerView = findViewById(R.id.time_to_date_recycler_view);
+
         FloatingActionButton fab = findViewById(R.id.create_floating_button);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateTimeToDateActivity.createIntent(MainActivity.this));
+                startActivity(new CreateTimeToDateActivity().createIntent(MainActivity.this));
             }
         });
         recyclerView.setAdapter(adapter);
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void switchDeletingMode(MenuItem item) {
         adapter.switchDeletingMode();
-        if (adapter.getIsDeletingMode()) {
+        if (adapter.isDeletingMode()) {
             item.setIcon(R.drawable.ic_delete_switched_white_24dp);
         } else {
             item.setIcon(R.drawable.ic_delete_white_24dp);

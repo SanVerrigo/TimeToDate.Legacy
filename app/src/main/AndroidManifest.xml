@@ -18,9 +18,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:label="Создание"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:name=".CreateTimeToDateActivity"
+            android:label="@string/creation_string"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:label="@string/description_create_state_string"
+            android:windowSoftInputMode="adjustResize"
+            android:name=".EnterDescriptionActivity" />
     </application>
 
 </manifest>
