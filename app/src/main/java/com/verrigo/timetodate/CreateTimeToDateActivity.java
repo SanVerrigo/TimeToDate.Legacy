@@ -159,14 +159,7 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
 
         LocalTime time = LocalTime.now().withHourOfDay(0).withMinuteOfHour(0);
         timeTextView.setText(time.toString(TIME_FORMAT));
-        if (TextUtils.isEmpty(descriptionText)) {
-            descriptionTitleView.setText("Добавить описание");
-            descriptionTextView.setVisibility(View.GONE);
-        } else {
-            descriptionTitleView.setText("Описание");
-            descriptionTextView.setVisibility(View.VISIBLE);
-        }
-        descriptionTextView.setText(descriptionText);
+        updateDescription(descriptionText);
     }
 
     @Override
@@ -175,8 +168,7 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
         if (requestCode == REQUEST_CODE_EDIT_DESCRIPTION && resultCode == RESULT_OK) {
             descriptionText = data.getStringExtra(EnterDescriptionActivity.RESULT_DESCRIPTION);
             getIntent().putExtra(EXTRA_DESCRIPTION, descriptionText);
-            descriptionTextView.setText(descriptionText);
-            descriptionTextView.setVisibility(descriptionText.isEmpty() ? View.GONE : View.VISIBLE);
+            updateDescription(descriptionText);
         }
     }
 
@@ -185,14 +177,6 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
         outState.putString(EXTRA_NAME, nameEditText.getText().toString());
         outState.putString(EXTRA_DATE, dateTextView.getText().toString());
-    }
-
-    public String getDescriptionText() {
-        return descriptionText;
-    }
-
-    public void setDescriptionText(String descriptionText) {
-        this.descriptionText = descriptionText;
     }
 
     @Override
@@ -205,6 +189,17 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         LocalTime time = new LocalTime(hourOfDay, minute);
         timeTextView.setText(time.toString(TIME_FORMAT));
+    }
+
+    private void updateDescription(String descriptionText) {
+        if (TextUtils.isEmpty(descriptionText)) {
+            descriptionTitleView.setText("Добавить описание");
+            descriptionTextView.setVisibility(View.GONE);
+        } else {
+            descriptionTitleView.setText("Описание");
+            descriptionTextView.setVisibility(View.VISIBLE);
+        }
+        descriptionTextView.setText(descriptionText);
     }
 
     private LocalTime getTimeFromField() {
