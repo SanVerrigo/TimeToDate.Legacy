@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="text_l">24sp</dimen>
+    <dimen name="text_m">16sp</dimen>
+    <dimen name="text_s">14sp</dimen>
+    <dimen name="text_xs">12sp</dimen>
+
+    <dimen name="tile_height_default_item">48dp</dimen>
+    <dimen name="tile_height_medium_item">56dp</dimen>
+    <dimen name="tile_height_large_item">72dp</dimen>
+</resources>

@@ -5,7 +5,7 @@
     <string name="date_string">Дата:</string>
     <string name="enter_description_string">Введите описание</string>
     <string name="add_description_string">Добавить описание</string>
-    <string name="event_name_string">Название события:</string>
+    <string name="event_name_string">Название события</string>
     <string name="num_of_hours_string">Количество часов:</string>
     <string name="creation_string">Создание</string>
     <string name="edit_description">Редактировать</string>

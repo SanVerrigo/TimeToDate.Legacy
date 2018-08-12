@@ -1,11 +1,10 @@
 package com.verrigo.timetodate;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -20,27 +19,19 @@ public class EnterDescriptionActivity extends AppCompatActivity {
     public static final String EXTRA_NAME = "name";
     public static final String EXTRA_DATE = "date";
 
-    EditText editText;
+    public static final String RESULT_DESCRIPTION = "description";
 
+    private EditText editText;
 
-
-
-
-    public Intent createIntent(Context context, String description, int hours, String name, String date) {
-        Intent intent = new Intent(context, this.getClass());
-        intent.putExtra(EXTRA_DESCRIPTION, description);
-        intent.putExtra(EXTRA_HOURS, hours);
-        intent.putExtra(EXTRA_NAME, name);
-        intent.putExtra(EXTRA_DATE, date);
-        return intent;
+    public Intent createIntent(Context context, String description) {
+        return new Intent(context, this.getClass())
+                .putExtra(EXTRA_DESCRIPTION, description);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_description);
-
-
 
         editText = findViewById(R.id.description_edit_text);
         final TextView textView = findViewById(R.id.count_of_symbols_text_view);
@@ -62,7 +53,8 @@ public class EnterDescriptionActivity extends AppCompatActivity {
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -70,17 +62,18 @@ public class EnterDescriptionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
         FloatingActionButton applyDescriptionButton = findViewById(R.id.apply_description_text_button);
         applyDescriptionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle bundle = getIntent().getExtras();
-                startActivity(new CreateTimeToDateActivity().createIntentAndSetDescription(EnterDescriptionActivity.this, editText.getText().toString(),
-                        bundle.getInt(EXTRA_HOURS),
-                        bundle.getString(EXTRA_NAME),
-                        bundle.getString(EXTRA_DATE)));
+                String description = editText.getText().toString();
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(RESULT_DESCRIPTION, description);
+                setResult(RESULT_OK, resultIntent);
+                finish();
             }
         });
 
