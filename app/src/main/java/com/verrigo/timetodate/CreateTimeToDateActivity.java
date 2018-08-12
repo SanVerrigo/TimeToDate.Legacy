@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcel;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +30,11 @@ public class CreateTimeToDateActivity extends AppCompatActivity {
     private String descriptionText = null;
     private  Button setDescriptionButton;
 
+    private final String EXTRA_HOURS = EnterDescriptionActivity.EXTRA_HOURS;
+    private final String EXTRA_DESCRIPTION = EnterDescriptionActivity.EXTRA_DESCRIPTION;
+    private final String EXTRA_DATE = EnterDescriptionActivity.EXTRA_DATE;
+    private final String EXTRA_NAME = EnterDescriptionActivity.EXTRA_NAME;
+
     public Intent createIntent(Context context) {
         Intent intent = new Intent(context, CreateTimeToDateActivity.class);
         return intent;
@@ -36,10 +42,10 @@ public class CreateTimeToDateActivity extends AppCompatActivity {
 
     public Intent createIntentAndSetDescription(Context context, String description, int hours, String name, String date) {
         Intent intent = new Intent(context, CreateTimeToDateActivity.class);
-        intent.putExtra(EnterDescriptionActivity.EXTRA_DESCRIPTION, description);
-        intent.putExtra(EnterDescriptionActivity.EXTRA_HOURS, hours);
-        intent.putExtra(EnterDescriptionActivity.EXTRA_NAME, name);
-        intent.putExtra(EnterDescriptionActivity.EXTRA_DATE, date);
+        intent.putExtra(EXTRA_DESCRIPTION, description);
+        intent.putExtra(EXTRA_HOURS, hours);
+        intent.putExtra(EXTRA_NAME, name);
+        intent.putExtra(EXTRA_DATE, date);
         return intent;
     }
 
@@ -51,10 +57,10 @@ public class CreateTimeToDateActivity extends AppCompatActivity {
             Intent intent = getIntent();
             intent.getExtras().getString(EnterDescriptionActivity.EXTRA_DESCRIPTION);
             if (intent != null) {
-                descriptionText = intent.getExtras().getString(EnterDescriptionActivity.EXTRA_DESCRIPTION);
-                hoursEditText.setText(Integer.toString(intent.getExtras().getInt(EnterDescriptionActivity.EXTRA_HOURS)));
-                nameEditText.setText(intent.getExtras().getString(EnterDescriptionActivity.EXTRA_NAME));
-                dateTextView.setText(intent.getExtras().getString(EnterDescriptionActivity.EXTRA_DATE));
+                descriptionText = intent.getExtras().getString(EXTRA_DESCRIPTION);
+                hoursEditText.setText(Integer.toString(intent.getExtras().getInt(EXTRA_HOURS)));
+                nameEditText.setText(intent.getExtras().getString(EXTRA_NAME));
+                dateTextView.setText(intent.getExtras().getString(EXTRA_DATE));
                 ImageButton goToDescriptionButton = findViewById(R.id.see_description_button);
                 if (descriptionText.equals("")) {
                     setDescriptionButton.setText(R.string.add_description_string);
@@ -85,6 +91,7 @@ public class CreateTimeToDateActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,6 +183,21 @@ public class CreateTimeToDateActivity extends AppCompatActivity {
                 }
             }
         });
+
+        if (savedInstanceState != null) {
+            hoursEditText.setText(hoursEditText.getText().equals("") ? "" : savedInstanceState.getString(EXTRA_HOURS));
+            nameEditText.setText(savedInstanceState.getString(EXTRA_NAME));
+            dateTextView.setText(savedInstanceState.getString(EXTRA_DATE));
+        }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EXTRA_HOURS, hoursEditText.getText().toString());
+        outState.putString(EXTRA_NAME, nameEditText.getText().toString());
+        outState.putString(EXTRA_DATE, dateTextView.getText().toString());
     }
 
     public String getDescriptionText() {

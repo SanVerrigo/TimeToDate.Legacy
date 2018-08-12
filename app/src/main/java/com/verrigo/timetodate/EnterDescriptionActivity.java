@@ -20,6 +20,10 @@ public class EnterDescriptionActivity extends AppCompatActivity {
     public static final String EXTRA_NAME = "name";
     public static final String EXTRA_DATE = "date";
 
+    EditText editText;
+
+
+
 
 
     public Intent createIntent(Context context, String description, int hours, String name, String date) {
@@ -36,7 +40,9 @@ public class EnterDescriptionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_description);
 
-        final EditText editText = findViewById(R.id.description_edit_text);
+
+
+        editText = findViewById(R.id.description_edit_text);
         final TextView textView = findViewById(R.id.count_of_symbols_text_view);
 
         final int maxLength = getResources().getInteger(R.integer.enter_description_max_width_integer);
@@ -48,6 +54,10 @@ public class EnterDescriptionActivity extends AppCompatActivity {
         } catch (Exception ex) {
             textView.setText(String.format("%d/%d", 0, maxLength));
             Toast.makeText(this, "lul", Toast.LENGTH_SHORT).show();
+        }
+
+        if (savedInstanceState != null) {
+            editText.setText(savedInstanceState.getString(EXTRA_DESCRIPTION));
         }
 
         editText.addTextChangedListener(new TextWatcher() {
@@ -74,5 +84,11 @@ public class EnterDescriptionActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EXTRA_DESCRIPTION, editText.getText().toString());
     }
 }
