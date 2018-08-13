@@ -15,6 +15,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.sql.Time;
 import java.util.List;
 
 /**
@@ -87,55 +93,68 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final TimeToDate timeToDate = timeToDates.get(position);
-            holder.isSettingState = false;
-            try {
-                if (timeToDate.getDescription().equals("")) {
-                    holder.detailsDescriptionTextView.setText("Нет описания");
-                } else {
-                    holder.detailsDescriptionTextView.setText(timeToDate.getDescription());
-                }
-            } catch (Exception ex) {
+        try {
+            if (timeToDate.getDescription().equals("")) {
                 holder.detailsDescriptionTextView.setText("Нет описания");
+            } else {
+                holder.detailsDescriptionTextView.setText(timeToDate.getDescription());
             }
-            holder.subDetailsCardView.setVisibility(timeToDate.isExpanded() ? View.VISIBLE : View.GONE);
-            String[] date = timeToDate.getDate().split("-");
-            String year = date[0];
-            StringBuilder sb = new StringBuilder();
-            sb.append(year.charAt(year.length() - 2));
-            sb.append(year.charAt(year.length() - 1));
-            String yearTwoLast = sb.toString();
-            int month = Integer.parseInt(date[1]);
-            int day = Integer.parseInt(date[2]);
-            int hour = Integer.parseInt(date[3]);
-            holder.detailsDateTextView.setText(String.format("%02d.%02d.%s\n%d ч.", day, month, yearTwoLast, hour));
-            holder.nameTextView.setText(timeToDate.getName());
-            holder.timeToDateTextView.setText(TimeToDate.currentLeftTime(timeToDate.getDate()));
+        } catch (Exception ex) {
+            holder.detailsDescriptionTextView.setText("Нет описания");
+        }
+        holder.subDetailsCardView.setVisibility(timeToDate.isExpanded() ? View.VISIBLE : View.GONE);
 
-            holder.deleteTimeToDateImageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    timeToDateForDeleting = timeToDate;
-                    new DeleteFromDatabase(position).execute();
-                }
-            });
 
-            if (deleteAnimator != null) {
-                final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) holder.space.getLayoutParams();
-                if (deleteAnimator.isRunning()) {
-                    deleteAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator animation) {
-                            lp.leftMargin = (int) animation.getAnimatedValue();
-                            holder.space.requestLayout();
-                        }
-                    });
-                } else {
-                    lp.leftMargin = (int) deleteAnimator.getAnimatedValue();
-                    holder.space.requestLayout();
-                }
+        String[] date = timeToDate.getDate().split(" ");
+        String rawDate = date[0];
+        String rawTime = date[1];
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(TimeToDate.DATE_FORMAT);
+        DateTimeFormatter sformatter = DateTimeFormat.forPattern(TimeToDate.TIME_FORMAT);
+        LocalDate date1 = LocalDate.parse(rawDate, formatter);
+        LocalTime time = LocalTime.parse(rawTime, sformatter);
+        String year = Integer.toString(date1.getYear());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(year.charAt(year.length() - 2));
+        sb.append(year.charAt(year.length() - 1));
+
+        String yearTwoLast = sb.toString();
+        int month = date1.getMonthOfYear();
+        int day = date1.getDayOfMonth();
+        int hour = time.getHourOfDay();
+        int mins = time.getMinuteOfHour();
+
+
+        holder.detailsDateTextView.setText(!(hour == 0 && mins == 0) ? String.format("%02d.%02d.%s\n%02d:%02d", day, month, yearTwoLast, hour, mins) : String.format("%02d.%02d.%s", day, month, yearTwoLast));
+        holder.nameTextView.setText(timeToDate.getName());
+        holder.timeToDateTextView.setText(TimeToDate.currentLeftTime(timeToDate.getDate()));
+
+
+        holder.deleteTimeToDateImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timeToDateForDeleting = timeToDate;
+                new DeleteFromDatabase(position).execute();
             }
-            holder.itemView.setTag(holder);
-            holder.itemView.setOnClickListener(this);
+        });
+
+        if (deleteAnimator != null) {
+            final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) holder.space.getLayoutParams();
+            if (deleteAnimator.isRunning()) {
+                deleteAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        lp.leftMargin = (int) animation.getAnimatedValue();
+                        holder.space.requestLayout();
+                    }
+                });
+            } else {
+                lp.leftMargin = (int) deleteAnimator.getAnimatedValue();
+                holder.space.requestLayout();
+            }
+        }
+        holder.itemView.setTag(holder);
+        holder.itemView.setOnClickListener(this);
     }
 
     @Override

@@ -117,14 +117,32 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
 
                     LocalTime time = getTimeFromField();
                     int hours = time.getHourOfDay();
+                    int mins = time.getMinuteOfHour();
                     // todo use minutes later on too
                     if (hours >= 0 && hours <= 23) {
+                        String editName = nameEditText.getText().toString();
                         String name = nameEditText.getText().toString();
-                        if (name.length() <= 0) {
+                        StringBuilder nameBuilder = new StringBuilder(name);
+                        boolean correctName = false;
+                        for (int i = 0; i < editName.length(); i++) {
+                            if (!(editName.charAt(i) == ' ')) {
+                                correctName = true;
+                                break;
+                            } else {
+                                nameBuilder.deleteCharAt(0);
+                            }
+                        }
+                        name = nameBuilder.toString();
+                        if (name.length() <= 0 && !correctName) {
                             Toast.makeText(getApplicationContext(), "Please, enter a name", Toast.LENGTH_SHORT).show();
                         } else {
-                            String finalDate = String.format("%04d-%02d-%02d-%02d", year, month, day, hours);
+
                             TimeToDateDatabaseHelper dbHelper = new TimeToDateDatabaseHelper(getApplicationContext());
+
+                            //start of new code
+                            String finalDate = String.format("%02d.%02d.%04d %02d:%02d", day, month, year, hours, mins);
+                            //end of new code
+
                             dbHelper.addNewTimeToDate(new TimeToDate(name, finalDate, descriptionText));
                             startActivity(new Intent(CreateTimeToDateActivity.this, MainActivity.class));
                         }
@@ -209,7 +227,7 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
 
     private LocalDate getDateFromField() {
         String rawDate = dateTextView.getText().toString();
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(DATE_FORMAT);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(TimeToDate.DATE_FORMAT);
         return LocalDate.parse(rawDate, formatter);
     }
 }

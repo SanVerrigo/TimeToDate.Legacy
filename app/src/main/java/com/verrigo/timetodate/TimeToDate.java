@@ -1,5 +1,12 @@
 package com.verrigo.timetodate;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,11 +24,15 @@ public class TimeToDate {
 
     public final static String format = "yyyy-MM-dd-kk";
 
+    public static final String DATE_FORMAT = "dd.MM.yyyy";
+    public static final String TIME_FORMAT = "HH:mm";
+
     private boolean isExpanded = false;
     private int _id = 0;
     private String name;
     private String date;
     private String description;
+
 
     TimeToDate() {
     }
@@ -54,18 +65,44 @@ public class TimeToDate {
         this.date = date;
     }
 
+    // change this part
     public static String currentLeftTime(String dateTime) {
-        SimpleDateFormat ft = new SimpleDateFormat(format);
-        Date parsingDate = null;
-        try {
-            parsingDate = ft.parse(dateTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        long startInMills = System.currentTimeMillis();
-        long endInMills = parsingDate.getTime();
+        //start of the new code
+        String[] dateTimeList = dateTime.split(" ");
+        String rawDate = dateTimeList[0];
+        String rawTime = dateTimeList[1];
 
-        long secondsToDate = (endInMills - startInMills) / 1000;
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(DATE_FORMAT);
+        LocalDate date = LocalDate.parse(rawDate, formatter);
+        LocalTime time = LocalTime.parse(rawTime);
+
+        int dayOfDate = date.getDayOfMonth();
+        int monthOfDate = date.getMonthOfYear();
+        int yearOfDate = date.getYear();
+        int hoursOfDate = time.getHourOfDay();
+        int minsOfDate = time.getMinuteOfHour();
+
+        DateTime dateTime1 = new DateTime(yearOfDate, monthOfDate, dayOfDate, hoursOfDate, minsOfDate);
+
+
+        long startInMillis = System.currentTimeMillis();
+        long endInMillis = dateTime1.getMillis() - (3 * 60 * 60 * 1000);
+
+
+
+        //end of the new code
+
+//        SimpleDateFormat ft = new SimpleDateFormat(format);
+//        Date parsingDate = null;
+//        try {
+//            parsingDate = ft.parse(dateTime);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        long startInMills = System.currentTimeMillis();
+//        long endInMills = parsingDate.getTime();
+//
+        long secondsToDate = (endInMillis - startInMillis) / 1000;
         if (secondsToDate > 0) {
             int days = (int) (secondsToDate / (SECS_IN_MINUTE * MINUTES_IN_HOUR * HOURS_IN_DAY));
             int reminderOfDayInSecs = (int) (secondsToDate - (days * SECS_IN_MINUTE * MINUTES_IN_HOUR * HOURS_IN_DAY));
