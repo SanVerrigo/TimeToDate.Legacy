@@ -1,10 +1,17 @@
 package com.verrigo.timetodate;
 
 import android.animation.ValueAnimator;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -29,7 +36,15 @@ import java.util.List;
 
 public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.ViewHolder> implements View.OnClickListener {
 
+    private String CHANNEL_ID = "channelId";
+    private int mId = 1;
+
     private boolean isDeletingMode = false;
+
+    public List<TimeToDate> getTimeToDates() {
+        return timeToDates;
+    }
+
     private List<TimeToDate> timeToDates;
     private TimeToDate timeToDateForDeleting;
     private OnRecyclerItemClickListener listener;
@@ -47,39 +62,11 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
         runTimer();
     }
 
-    public void switchDeletingMode() {
-        isDeletingMode = !isDeletingMode;
-        int startMargin;
-        int endMargin;
-        if (deleteAnimator != null && deleteAnimator.isRunning()) {
-            startMargin = (int) deleteAnimator.getAnimatedValue();
-            deleteAnimator.cancel();
-        } else {
-            startMargin = isDeletingMode ? HIDDEN_MARGIN : 0;
-        }
-        endMargin = isDeletingMode ? 0 : HIDDEN_MARGIN;
-        deleteAnimator = ValueAnimator.ofInt(startMargin, endMargin)
-                .setDuration(500);
-        deleteAnimator.setInterpolator(new FastOutSlowInInterpolator());
-        deleteAnimator.start();
-        notifyDataSetChanged();
-    }
-
-    public void runTimer() {
-        final Handler handlerForRunTimer = new Handler();
-        handlerForRunTimer.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-                handlerForRunTimer.postDelayed(this, 1000);
-            }
-        });
-    }
-
 
     public TimeToDateAdapter(OnRecyclerItemClickListener listener) {
         this.listener = listener;
     }
+
 
     @NonNull
     @Override
@@ -89,23 +76,79 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
         return new ViewHolder(view);
     }
 
-
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final TimeToDate timeToDate = timeToDates.get(position);
-        try {
-            if (timeToDate.getDescription().equals("")) {
-                holder.detailsDescriptionTextView.setText("Нет описания");
-            } else {
-                holder.detailsDescriptionTextView.setText(timeToDate.getDescription());
-            }
-        } catch (Exception ex) {
-            holder.detailsDescriptionTextView.setText("Нет описания");
-        }
         holder.subDetailsCardView.setVisibility(timeToDate.isExpanded() ? View.VISIBLE : View.GONE);
+        if (holder.subDetailsCardView.getVisibility() == View.VISIBLE) {
+            holder.detailsDescriptionTextView.setText(descriptionTextToSet(timeToDate.getDescription()));
+            holder.detailsDateTextView.setText(dateTextToSet(timeToDate.getDate()));
+        }
+        holder.nameTextView.setText(timeToDate.getName());
+        holder.timeToDateTextView.setText(TimeToDate.currentLeftTime(timeToDate.getDate()));
+        holder.mainCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timeToDate.setExpanded(!timeToDate.isExpanded());
+                notifyItemChanged(position);
+                listener.onRecyclerItemClick(timeToDate);
+            }
+        });
+        holder.subDetailsCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new EditTimeToDateActivity().createIntent(context, timeToDate.getName(), timeToDate.getDate(), timeToDate.getDescription(), timeToDate.get_id()));
+            }
+        });
+
+//        holder.itemView.setTag(holder);
+//        holder.itemView.setOnClickListener(this);
+        // excess code starts
+//        holder.deleteTimeToDateImageButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                timeToDateForDeleting = timeToDate;
+//
+//            }
+//        });
+//        if (deleteAnimator != null) {
+//            final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) holder.space.getLayoutParams();
+//            if (deleteAnimator.isRunning()) {
+//                deleteAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                    @Override
+//                    public void onAnimationUpdate(ValueAnimator animation) {
+//                        lp.leftMargin = (int) animation.getAnimatedValue();
+//                        holder.space.requestLayout();
+//                    }
+//                });
+//            } else {
+//                lp.leftMargin = (int) deleteAnimator.getAnimatedValue();
+//                holder.space.requestLayout();
+//            }
+//        }
+        // excess code ends
 
 
-        String[] date = timeToDate.getDate().split(" ");
+    }
+
+
+    @Override
+    public int getItemCount() {
+        return timeToDates.size();
+    }
+
+    public void setDeletingModeOnPosition(int position) {
+//        Toast.makeText(context, "sss" + position, Toast.LENGTH_SHORT).show();
+        timeToDates.get(position).setDeletingMode(true);
+        notifyItemChanged(position);
+    }
+
+    public void deleteTimeToDateOnPosition(int position) {
+        new DeleteFromDatabase(position, getTimeToDates()).execute();
+    }
+
+    private String dateTextToSet(String dateToSplit) {
+        String[] date = dateToSplit.split(" ");
         String rawDate = date[0];
         String rawTime = date[1];
         DateTimeFormatter formatter = DateTimeFormat.forPattern(TimeToDate.DATE_FORMAT);
@@ -123,43 +166,19 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
         int day = date1.getDayOfMonth();
         int hour = time.getHourOfDay();
         int mins = time.getMinuteOfHour();
-
-
-        holder.detailsDateTextView.setText(!(hour == 0 && mins == 0) ? String.format("%02d.%02d.%s\n%02d:%02d", day, month, yearTwoLast, hour, mins) : String.format("%02d.%02d.%s", day, month, yearTwoLast));
-        holder.nameTextView.setText(timeToDate.getName());
-        holder.timeToDateTextView.setText(TimeToDate.currentLeftTime(timeToDate.getDate()));
-
-
-        holder.deleteTimeToDateImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timeToDateForDeleting = timeToDate;
-                new DeleteFromDatabase(position).execute();
-            }
-        });
-
-        if (deleteAnimator != null) {
-            final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) holder.space.getLayoutParams();
-            if (deleteAnimator.isRunning()) {
-                deleteAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        lp.leftMargin = (int) animation.getAnimatedValue();
-                        holder.space.requestLayout();
-                    }
-                });
-            } else {
-                lp.leftMargin = (int) deleteAnimator.getAnimatedValue();
-                holder.space.requestLayout();
-            }
-        }
-        holder.itemView.setTag(holder);
-        holder.itemView.setOnClickListener(this);
+        return !(hour == 0 && mins == 0) ? String.format("%02d.%02d.%s\n%02d:%02d", day, month, yearTwoLast, hour, mins) : String.format("%02d.%02d.%s", day, month, yearTwoLast);
     }
 
-    @Override
-    public int getItemCount() {
-        return timeToDates.size();
+    private String descriptionTextToSet(String description) {
+        try {
+            if (description.equals("")) {
+                return "Нет описания";
+            } else {
+                return description;
+            }
+        } catch (Exception ex) {
+            return "Нет описания";
+        }
     }
 
     @Override
@@ -177,20 +196,21 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        boolean isSettingState;
+        final CardView mainCardView;
         final CardView subDetailsCardView;
+
         final TextView nameTextView;
         final TextView timeToDateTextView;
-
         final TextView detailsDescriptionTextView;
-        final TextView detailsDateTextView;
 
+        final TextView detailsDateTextView;
         final ImageButton deleteTimeToDateImageButton;
+
         final View space;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            isSettingState = true;
+            mainCardView = itemView.findViewById(R.id.main_container_card_view);
             detailsDateTextView = itemView.findViewById(R.id.details_date_text_view);
             detailsDescriptionTextView = itemView.findViewById(R.id.details_description_text_view);
             subDetailsCardView = itemView.findViewById(R.id.sub_container_details_card_view);
@@ -199,21 +219,30 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
             timeToDateTextView = itemView.findViewById(R.id.time_to_date_text_view);
             deleteTimeToDateImageButton = itemView.findViewById(R.id.delete_time_to_date_button);
         }
+
+    }
+
+    public void createNotification(String eventName, int numOfDays) {
+
     }
 
     public class DeleteFromDatabase extends AsyncTask<Void, Void, Boolean> {
 
+
         final int position;
 
-        DeleteFromDatabase(int position) {
+        List<TimeToDate> timeToDates;
+
+        DeleteFromDatabase(int position, List<TimeToDate> currentList) {
             this.position = position;
+            this.timeToDates = currentList;
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
                 TimeToDateDatabaseHelper dbHelper = new TimeToDateDatabaseHelper(context);
-                dbHelper.deleteTimeToDateRecord(timeToDateForDeleting.get_id(), context);
+                dbHelper.deleteTimeToDateRecord(timeToDates.get(position).get_id());
                 return true;
             } catch (Exception e) {
                 return false;
@@ -224,11 +253,42 @@ public class TimeToDateAdapter extends RecyclerView.Adapter<TimeToDateAdapter.Vi
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             if (!aBoolean) {
-                Toast.makeText(context, "Successfully ted!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Database is unavailable", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Deleted successfully", Toast.LENGTH_SHORT).show();
                 setTimeToDates(new TimeToDateDatabaseHelper(context).dbParseListTimeToDates());
                 notifyItemRemoved(position);
-            } else {
             }
         }
+
+    }
+
+
+    //    public void switchDeletingMode() {
+//        isDeletingMode = !isDeletingMode;
+//        int startMargin;
+//        int endMargin;
+//        if (deleteAnimator != null && deleteAnimator.isRunning()) {
+//            startMargin = (int) deleteAnimator.getAnimatedValue();
+//            deleteAnimator.cancel();
+//        } else {
+//            startMargin = isDeletingMode ? HIDDEN_MARGIN : 0;
+//        }
+//        endMargin = isDeletingMode ? 0 : HIDDEN_MARGIN;
+//        deleteAnimator = ValueAnimator.ofInt(startMargin, endMargin)
+//                .setDuration(500);
+//        deleteAnimator.setInterpolator(new FastOutSlowInInterpolator());
+//        deleteAnimator.start();
+//        notifyDataSetChanged();
+//    }
+    public void runTimer() {
+        final Handler handlerForRunTimer = new Handler();
+        handlerForRunTimer.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+                handlerForRunTimer.postDelayed(this, 1000);
+            }
+        });
     }
 }

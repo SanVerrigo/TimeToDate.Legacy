@@ -8,7 +8,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -34,7 +36,6 @@ public class EnterDescriptionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_description);
-
         editText = findViewById(R.id.description_edit_text);
         final TextView textView = findViewById(R.id.count_of_symbols_text_view);
 
@@ -76,6 +77,24 @@ public class EnterDescriptionActivity extends AppCompatActivity {
                 resultIntent.putExtra(RESULT_DESCRIPTION, description);
                 setResult(RESULT_OK, resultIntent);
                 finish();
+            }
+        });
+
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    String description = editText.getText().toString();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra(RESULT_DESCRIPTION, description);
+                    setResult(RESULT_OK, resultIntent);
+                    handled = true;
+                    finish();
+                    return handled;
+                } else {
+                    return handled;
+                }
             }
         });
     }

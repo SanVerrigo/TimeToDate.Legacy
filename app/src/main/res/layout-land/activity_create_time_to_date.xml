@@ -9,6 +9,8 @@
               tools:context="com.verrigo.timetodate.CreateTimeToDateActivity">
 
     <LinearLayout
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -115,7 +117,7 @@
             android:layout_height="56dp"
             android:layout_gravity="center"
             android:layout_margin="16dp"
-            android:src="@drawable/ic_check_white_48dp"
+            android:src="@drawable/ic_check_white_24dp"
             app:backgroundTint="@color/colorAcceptGreen"/>
 
     </LinearLayout>

@@ -3,6 +3,7 @@ package com.verrigo.timetodate;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -86,6 +87,16 @@ public class TimeToDateDatabaseHelper extends SQLiteOpenHelper {
         return receivedTimeToDate;
     }
 
+    public void changeTimeToDateWithId(int _id, String name, String description, String date) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues forUpgrade = new ContentValues();
+        forUpgrade.put(COLUMN_NAME, name);
+        forUpgrade.put(COLUMN_DESCRIPTION, description);
+        forUpgrade.put(COLUMN_DATE, date);
+        db.update(TABLE_NAME, forUpgrade, "_id = ?", new String[]{Integer.toString(_id)});
+        db.close();
+    }
+
     public List<TimeToDate> dbParseListTimeToDates(){
         List<TimeToDate> timeToDates = new ArrayList<>();
         SQLiteDatabase db = getWritableDatabase();
@@ -111,10 +122,9 @@ public class TimeToDateDatabaseHelper extends SQLiteOpenHelper {
         return timeToDates;
     }
 
-    public void deleteTimeToDateRecord(long id, Context context) {
+    public void deleteTimeToDateRecord(long id) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(deleteByIdCommand(id));
-        Toast.makeText(context, "Deleted successfully", Toast.LENGTH_SHORT).show();
     }
 
 

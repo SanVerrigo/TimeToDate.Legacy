@@ -27,6 +27,16 @@ public class TimeToDate {
     public static final String DATE_FORMAT = "dd.MM.yyyy";
     public static final String TIME_FORMAT = "HH:mm";
 
+
+    public boolean isDeletingMode() {
+        return isDeletingMode;
+    }
+
+    public void setDeletingMode(boolean deletingMode) {
+        isDeletingMode = deletingMode;
+    }
+
+    private boolean isDeletingMode = false;
     private boolean isExpanded = false;
     private int _id = 0;
     private String name;

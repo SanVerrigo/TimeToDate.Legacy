@@ -6,9 +6,9 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -21,7 +21,7 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class CreateTimeToDateActivity extends AppCompatActivity implements
+public class EditTimeToDateActivity extends AppCompatActivity implements
         DatePickerDialog.OnDateSetListener,
         TimePickerDialog.OnTimeSetListener {
 
@@ -42,33 +42,40 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
     private final String EXTRA_DESCRIPTION = EnterDescriptionActivity.EXTRA_DESCRIPTION;
     private final String EXTRA_DATE = EnterDescriptionActivity.EXTRA_DATE;
     private final String EXTRA_NAME = EnterDescriptionActivity.EXTRA_NAME;
+    private final String EXTRA_ID = "extrasId";
 
-    public Intent createIntent(Context context) {
-        Intent intent = new Intent(context, CreateTimeToDateActivity.class);
+    public Intent createIntent(Context context, String name, String date, String description, int _id) {
+        Intent intent = new Intent(context, EditTimeToDateActivity.class);
+        intent.putExtra(EXTRA_NAME, name);
+        intent.putExtra(EXTRA_DATE, date);
+        intent.putExtra(EXTRA_DESCRIPTION, description);
+        intent.putExtra(EXTRA_ID, _id);
         return intent;
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_time_to_date);
+        setContentView(R.layout.activity_edit_time_to_date);
+        Intent intent = getIntent();
+        final int _id = intent.getExtras().getInt(EXTRA_ID);
+        descriptionText = intent.getStringExtra(EXTRA_DESCRIPTION);
 
-        View setDateButton = findViewById(R.id.choose_date_block);
-        View chooseTimeBlock = findViewById(R.id.choose_time_block);
-        setDescriptionButton = findViewById(R.id.enter_description_button);
-        descriptionTextView = findViewById(R.id.description_text);
-        descriptionTitleView = findViewById(R.id.description_title);
-        dateTextView = findViewById(R.id.current_date_text_view);
-        timeTextView = findViewById(R.id.time_text_view);
-        nameEditText = findViewById(R.id.name_edit_text);
-        FloatingActionButton acceptButton = findViewById(R.id.accept_button);
+        View setDateButton = findViewById(R.id.editing_choose_date_block);
+        View chooseTimeBlock = findViewById(R.id.editing_choose_time_block);
+        setDescriptionButton = findViewById(R.id.editing_enter_description_button);
+        descriptionTextView = findViewById(R.id.editing_description_text);
+        descriptionTitleView = findViewById(R.id.editing_description_title);
+        dateTextView = findViewById(R.id.editing_current_date_text_view);
+        timeTextView = findViewById(R.id.editing_time_text_view);
+        nameEditText = findViewById(R.id.editing_name_edit_text);
+        FloatingActionButton acceptButton = findViewById(R.id.editing_accept_button);
 
         setDescriptionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(new EnterDescriptionActivity().createIntent(
-                        CreateTimeToDateActivity.this,
+                        EditTimeToDateActivity.this,
                         descriptionTextView.getText().toString()), REQUEST_CODE_EDIT_DESCRIPTION);
             }
         });
@@ -81,13 +88,14 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
                 int month = date.getMonthOfYear() - 1;
                 int year = date.getYear();
 
-                Dialog picker = new DatePickerDialog(CreateTimeToDateActivity.this,
-                        CreateTimeToDateActivity.this,
+                Dialog picker = new DatePickerDialog(EditTimeToDateActivity.this,
+                        EditTimeToDateActivity.this,
                         year, month, day);
                 picker.setTitle("Выберите дату");
                 picker.show();
             }
         });
+
         chooseTimeBlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,8 +103,8 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
                 int hours = time.getHourOfDay();
                 int minutes = time.getMinuteOfHour();
 
-                Dialog picker = new TimePickerDialog(CreateTimeToDateActivity.this,
-                        CreateTimeToDateActivity.this,
+                Dialog picker = new TimePickerDialog(EditTimeToDateActivity.this,
+                        EditTimeToDateActivity.this,
                         hours,
                         minutes,
                         true);
@@ -132,18 +140,14 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
                             }
                         }
                         name = nameBuilder.toString();
+                        descriptionText = descriptionTextView.getText().toString();
                         if (name.length() <= 0 && !correctName) {
                             Toast.makeText(getApplicationContext(), "Please, enter a name", Toast.LENGTH_SHORT).show();
                         } else {
-
                             TimeToDateDatabaseHelper dbHelper = new TimeToDateDatabaseHelper(getApplicationContext());
-
-                            //start of new code
                             String finalDate = String.format("%02d.%02d.%04d %02d:%02d", day, month, year, hours, mins);
-                            //end of new code
-
-                            dbHelper.addNewTimeToDate(new TimeToDate(name, finalDate, descriptionText));
-                            startActivity(new Intent(CreateTimeToDateActivity.this, MainActivity.class));
+                            dbHelper.changeTimeToDateWithId(_id, name, descriptionText, finalDate);
+                            startActivity(new Intent(EditTimeToDateActivity.this, MainActivity.class));
                         }
                     } else {
                         Toast.makeText(getApplicationContext(), "Please, enter correct hours", Toast.LENGTH_SHORT).show();
@@ -160,23 +164,20 @@ public class CreateTimeToDateActivity extends AppCompatActivity implements
             dateTextView.setText(savedInstanceState.getString(EXTRA_DATE));
             timeTextView.setText(savedInstanceState.getString(EXTRA_HOURS));
         }
-
     }
 
     private void fillIntentData() {
         Intent intent = getIntent();
-
         descriptionText = intent.getStringExtra(EXTRA_DESCRIPTION);
         nameEditText.setText(intent.getStringExtra(EXTRA_NAME));
-        String extraDate = intent.getStringExtra(EXTRA_DATE);
+        String[] dateToCorrect = intent.getStringExtra(EXTRA_DATE).split(" ");
+        String extraDate = dateToCorrect[0];
         if (TextUtils.isEmpty(extraDate)) {
             dateTextView.setText(new LocalDate().toString(DATE_FORMAT));
         } else {
             dateTextView.setText(extraDate);
         }
-
-        LocalTime time = LocalTime.now().withHourOfDay(0).withMinuteOfHour(0);
-        timeTextView.setText(time.toString(TIME_FORMAT));
+        timeTextView.setText(dateToCorrect[1]);
         updateDescription(descriptionText);
     }
 

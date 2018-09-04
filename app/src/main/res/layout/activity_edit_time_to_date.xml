@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center"
-              android:orientation="vertical"
-              tools:context="com.verrigo.timetodate.CreateTimeToDateActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context="com.verrigo.timetodate.EditTimeToDateActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:paddingRight="16dp">
 
             <EditText
-                android:id="@+id/name_edit_text"
+                android:id="@+id/editing_name_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/event_name_string"
@@ -33,7 +33,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <LinearLayout
-            android:id="@+id/choose_date_block"
+            android:id="@+id/editing_choose_date_block"
             android:layout_width="match_parent"
             android:layout_height="@dimen/tile_height_medium_item"
             android:background="?selectableItemBackground"
@@ -49,7 +49,7 @@
                 android:textAppearance="@style/Text.Small.Light"/>
 
             <TextView
-                android:id="@+id/current_date_text_view"
+                android:id="@+id/editing_current_date_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Text.Default.Dark"
@@ -58,7 +58,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/choose_time_block"
+            android:id="@+id/editing_choose_time_block"
             android:layout_width="match_parent"
             android:layout_height="@dimen/tile_height_medium_item"
             android:background="?selectableItemBackground"
@@ -74,7 +74,7 @@
                 android:textAppearance="@style/Text.Small.Light"/>
 
             <TextView
-                android:id="@+id/time_text_view"
+                android:id="@+id/editing_time_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Text.Default.Dark"
@@ -83,7 +83,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/enter_description_button"
+            android:id="@+id/editing_enter_description_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackground"
@@ -96,14 +96,14 @@
             android:paddingTop="9dp">
 
             <TextView
-                android:id="@+id/description_title"
+                android:id="@+id/editing_description_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Описание"
                 android:textAppearance="@style/Text.Small.Light"/>
 
             <TextView
-                android:id="@+id/description_text"
+                android:id="@+id/editing_description_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Text.Default.Dark"
@@ -112,7 +112,7 @@
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/accept_button"
+            android:id="@+id/editing_accept_button"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_gravity="center"
