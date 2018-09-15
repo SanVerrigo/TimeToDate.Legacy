@@ -74,6 +74,7 @@
             android:layout_marginStart="12dp"
             android:layout_marginBottom="4dp"
             android:clickable="true"
+            android:visibility="gone"
             app:cardCornerRadius="0dp"
             app:layout_constraintTop_toBottomOf="@id/main_container_card_view">
 

@@ -21,9 +21,6 @@ public class TimeToDate {
     private final static int MINUTES_IN_HOUR = 60;
     private final static int HOURS_IN_DAY = 24;
 
-
-    public final static String format = "yyyy-MM-dd-kk";
-
     public static final String DATE_FORMAT = "dd.MM.yyyy";
     public static final String TIME_FORMAT = "HH:mm";
 

@@ -12,7 +12,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import static android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE;
+import static android.support.v7.widget.helper.ItemTouchHelper.DOWN;
 import static android.support.v7.widget.helper.ItemTouchHelper.LEFT;
+import static android.support.v7.widget.helper.ItemTouchHelper.UP;
 
 class SwipeController extends Callback {
 
@@ -22,16 +24,24 @@ class SwipeController extends Callback {
     private float x2;
     static final int MIN_DISTANCE = 150;
     private boolean firstTime = true;
+    private final ItemTouchHelperAdapter itemTouchHelperAdapter;
+
+    public SwipeController(ItemTouchHelperAdapter itemTouchHelperAdapter) {
+        this.itemTouchHelperAdapter = itemTouchHelperAdapter;
+    }
 
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         adapter = (TimeToDateAdapter) recyclerView.getAdapter();
-        return makeMovementFlags(0, LEFT);
+        int swipeFlags = LEFT;
+        int dragFlags = UP | DOWN;
+        return makeMovementFlags(dragFlags, swipeFlags);
     }
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        return false;
+        itemTouchHelperAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        return true;
     }
 
 
@@ -44,7 +54,7 @@ class SwipeController extends Callback {
 
 
 
-//    public int convertToAbsoluteDirection(int flags, int layoutDirection) {
+    //    public int convertToAbsoluteDirection(int flags, int layoutDirection) {
 //        if (swipeBack) {
 //            swipeBack = false;
 //            return 0;
